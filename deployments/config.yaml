@@ -1,0 +1,118 @@
+# This is a Kubernetes ConfigMap that stores configuration data for Uber Eats microservices.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: uber-eats-config
+data:
+  # Configuration for the Uber Eats server.
+  config.yaml: |-
+    uber-eats:
+      server:
+        name: "uber-eats"
+        host: 'uber-eats-server'
+        grpc:
+          port: ':50050'
+        http:
+          port: ':8050'
+        metrics:
+          port: ':9050'
+    # Configuration for the user microservice.
+    user:
+      db:
+        host: 'user-db'
+        port: ':3306'
+        user: 'root'
+        password: ''
+        name: 'users'
+      server:
+        name: 'user'
+        host: 'user-server'
+        grpc:
+          port: ':50051'
+        http:
+          port: ':8051'
+        metrics:
+          port: ':9051'
+    # Configuration for the restaurant microservice.
+    restaurant:
+      db:
+        host: 'restaurant-db'
+        port: ':3306'
+        user: 'root'
+        password: ''
+        name: 'restaurant'
+      server:
+        name: 'restaurant'
+        host: 'restaurant-server'
+        grpc:
+          port: ':50052'
+        http:
+          port: ':8052'
+        metrics:
+          port: ':9052'
+    # Configuration for the order microservice.
+    order:
+      db:
+        host: 'order-db'
+        port: ':3306'
+        user: 'root'
+        password: ''
+        name: 'order'
+      server:
+        name: 'order'
+        host: 'order-server'
+        grpc:
+          port: ':50053'
+        http:
+          port: ':8053'
+        metrics:
+          port: ':9053'
+    # Configuration for the payment microservice.
+    payment:
+      db:
+        host: 'payment-db'
+        port: ':3306'
+        user: 'root'
+        password: ''
+        name: 'payment'
+      server:
+        name: 'payment'
+        host: 'payment-server'
+        grpc:
+          port: ':50054'
+        http:
+          port: ':8054'
+        metrics:
+          port: ':9054'
+    # Configuration for the delivery microservice.
+    delivery:
+      db:
+        host: 'delivery-db'
+        port: ':3306'
+        user: 'root'
+        password: ''
+        name: 'delivery'
+      server:
+        name: 'delivery'
+        host: 'delivery-server'
+        grpc:
+          port: ':50055'
+        http:
+          port: ':8055'
+        metrics:
+          port: ':9055'
+    # Configuration for the authentication microservice.
+    auth:
+      server:
+        name: 'auth'
+        host: 'auth-server'
+        grpc:
+          port: ':50056'
+        http:
+          port: ':8056'
+        metrics:
+          port: ':9056'
+    # Configuration for JSON Web Tokens.
+    jwt:
+      secret: 'secret'
+      expires: 36000

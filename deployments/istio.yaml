@@ -1,0 +1,289 @@
+# This is a YAML file that defines Istio resources for the Uber Eats application.
+
+# This section defines a Gateway resource that exposes the application to the outside world.
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: uber-eats-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+    - port:
+        number: 80
+        protocol: HTTP
+        name: http
+      hosts:
+        - "*"
+---
+# This section defines a VirtualService resource that routes traffic to the auth server.
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: auth-virtual-service
+spec:
+  gateways:
+    - mesh
+  hosts:
+    - auth-server.default.svc.cluster.local
+  http:
+    - route:
+        - destination:
+            host: auth-server.default.svc.cluster.local
+            port:
+              number: 50054
+            subset: v1
+          weight: 100
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+---
+# This section defines a DestinationRule resource that specifies the subset of the auth server to use.
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: auth-destination-rule
+spec:
+  host: auth-server.default.svc.cluster.local
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+---
+# This section defines a VirtualService resource that routes traffic to the user server.
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: user-virtual-service
+spec:
+  gateways:
+    - mesh
+  hosts:
+    - user-server.default.svc.cluster.local
+  http:
+    - route:
+        - destination:
+            host: user-server.default.svc.cluster.local
+            port:
+              number: 50051
+            subset: v1
+          weight: 100
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+---
+# This section defines a DestinationRule resource that specifies the subset of the user server to use.
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: user-destination-rule
+spec:
+  host: user-server.default.svc.cluster.local
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+---
+# This section defines a VirtualService resource that routes traffic to the Uber Eats server.
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: uber-eats-virtual-service
+spec:
+  gateways:
+    - mesh
+  hosts:
+    - uber-eats-server.default.svc.cluster.local
+  http:
+    - route:
+        - destination:
+            host: uber-eats-server.default.svc.cluster.local
+            port:
+              number: 8080
+            subset: v1
+          weight: 100
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+---
+# This section defines a DestinationRule resource that specifies the subset of the Uber Eats server to use.
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: uber-eats-destination-rule
+spec:
+  host: uber-eats-server.default.svc.cluster.local
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+---
+# This section defines a VirtualService resource that routes traffic to the delivery server.
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: delivery-virtual-service
+spec:
+  gateways:
+    - mesh
+  hosts:
+    - delivery-server.default.svc.cluster.local
+  http:
+    - route:
+        - destination:
+            host: delivery-server.default.svc.cluster.local
+            port:
+              number: 50055
+            subset: v1
+          weight: 100
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+---
+# This section defines a DestinationRule resource that specifies the subset of the delivery server to use.
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: delivery-destination-rule
+spec:
+  host: delivery-server.default.svc.cluster.local
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+---
+# This section defines a VirtualService resource that routes traffic to the order server.
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: order-virtual-service
+spec:
+  gateways:
+    - mesh
+  hosts:
+    - order-server.default.svc.cluster.local
+  http:
+    - route:
+        - destination:
+            host: order-server.default.svc.cluster.local
+            port:
+              number: 50056
+            subset: v1
+          weight: 100
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+---
+# This section defines a DestinationRule resource that specifies the subset of the order server to use.
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: order-destination-rule
+spec:
+  host: order-server.default.svc.cluster.local
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+---
+# This section defines a VirtualService resource that routes traffic to the restaurant server.
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: restaurant-virtual-service
+spec:
+  gateways:
+    - mesh
+  hosts:
+    - restaurant-server.default.svc.cluster.local
+  http:
+    - route:
+        - destination:
+            host: restaurant-server.default.svc.cluster.local
+            port:
+              number: 50057
+            subset: v1
+          weight: 100
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+---
+# This section defines a DestinationRule resource that specifies the subset of the restaurant server to use.
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: restaurant-destination-rule
+spec:
+  host: restaurant-server.default.svc.cluster.local
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+---
+# This section defines a VirtualService resource that routes traffic to the payments server.
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: payments-virtual-service
+spec:
+  gateways:
+    - mesh
+  hosts:
+    - payments-server.default.svc.cluster.local
+  http:
+    - route:
+        - destination:
+            host: payments-server.default.svc.cluster.local
+            port:
+              number: 50058
+            subset: v1
+          weight: 100
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+---
+# This section defines a DestinationRule resource that specifies the subset of the payments server to use.
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: payments-destination-rule
+spec:
+  host: payments-server.default.svc.cluster.local
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+---
+# This section defines a VirtualService resource that routes traffic to the dtm server.
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: dtm-virtual-service
+spec:
+  gateways:
+    - mesh
+  hosts:
+    - dtm-server.default.svc.cluster.local
+  http:
+    - route:
+        - destination:
+            host: dtm-server.default.svc.cluster.local
+            port:
+              number: 36790
+            subset: v1
+          weight: 100
+      retries:
+        attempts: 3
+        perTryTimeout: 2s
+---
+# This section defines a DestinationRule resource that specifies the subset of the dtm server to use.
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: dtm-destination-rule
+spec:
+  host: dtm-server.default.svc.cluster.local
+  subsets:
+    - name: v1
+      labels:
+        version: v1

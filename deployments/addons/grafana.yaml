@@ -1,0 +1,56 @@
+apiVersion: apps/v1 # The Kubernetes API version used for this deployment
+kind: Deployment # The type of Kubernetes resource being created
+metadata: # Metadata for the deployment
+  name: grafana # The name of the deployment
+  labels: # Labels to apply to the deployment
+    app: grafana # Label for the deployment
+spec: # The specification for the deployment
+  replicas: 1 # The number of replicas to create
+  selector: # The selector used to match pods to this deployment
+    matchLabels: # The labels used to match pods to this deployment
+      app: grafana # The label used to match pods to this deployment
+  template: # The pod template used to create new pods
+    metadata: # Metadata for the pod template
+      labels: # Labels to apply to the pod template
+        app: grafana # Label for the pod template
+    spec: # The specification for the pod template
+      containers: # The containers to run in the pod
+      - name: grafana # The name of the container
+        image: grafana/grafana:latest # The Docker image to use for the container
+        resources: # Resource limits and requests for the container
+          limits: # Maximum resource limits for the container
+            cpu: "1" # Maximum CPU usage for the container
+            memory: "1Gi" # Maximum memory usage for the container
+          requests: # Minimum resource requests for the container
+            cpu: "0.5" # Minimum CPU usage for the container
+            memory: "512Mi" # Minimum memory usage for the container
+        ports: # Ports to expose on the container
+        - containerPort: 3000 # The port to expose
+        env: # Environment variables to set in the container
+        - name: GF_AUTH_ANONYMOUS_ENABLED # The name of the environment variable
+          value: "true" # The value of the environment variable
+        - name: GF_AUTH_ANONYMOUS_ORG_ROLE # The name of the environment variable
+          value: "Admin" # The value of the environment variable
+        - name: GF_SERVER_HTTP_PORT # The name of the environment variable
+          value: "3000" # The value of the environment variable
+        - name: GF_INSTALL_PLUGINS # The name of the environment variable
+          value: "grafana-istio-mixer-datasource" # The value of the environment variable
+        volumeMounts: # Volumes to mount in the container
+        - name: grafana-storage # The name of the volume
+          mountPath: /var/lib/grafana # The path to mount the volume in the container
+      volumes: # Volumes to create for the pod
+      - name: grafana-storage # The name of the volume
+        emptyDir: {} # An empty volume that is deleted when the pod is deleted
+---
+apiVersion: v1 # The Kubernetes API version used for this service
+kind: Service # The type of Kubernetes resource being created
+metadata: # Metadata for the service
+  name: grafana # The name of the service
+spec: # The specification for the service
+  selector: # The selector used to match pods to this service
+    app: grafana # The label used to match pods to this service
+  ports: # Ports to expose on the service
+  - name: http # The name of the port
+    port: 3000 # The port number
+    targetPort: 3000 # The target port number on the pods
+  type: ClusterIP # The type of service to create

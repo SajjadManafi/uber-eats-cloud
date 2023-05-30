@@ -1,0 +1,76 @@
+# This is a Kubernetes Deployment object that manages a set of replicated Pods.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-server # The name of the Deployment object.
+  labels:
+    app: user-server # A label that identifies the Deployment as belonging to the "user-server" application.
+    version: v1 # A label that identifies the version of the "user-server" application.
+spec:
+  replicas: 1 # The number of replicated Pods to maintain.
+  selector:
+    matchLabels:
+      app: user-server # The label selector that matches the Pods managed by this Deployment.
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: user-server # The labels to apply to the Pods created from this template.
+        version: v1
+    spec:
+      containers:
+        - name: user-server # The name of the container.
+          image: blog/user-server # The Docker image to use for the container.
+          imagePullPolicy: IfNotPresent # The policy for pulling the Docker image.
+          ports:
+            - containerPort: 50051 # The port that the container listens on.
+              protocol: TCP # The protocol used by the port.
+              name: grpc # A name for the port.
+            - containerPort: 9051
+              protocol: TCP
+              name: metrics
+          readinessProbe: # The probe used to determine if the container is ready to serve requests.
+            exec:
+              command: [ "/grpc-health-probe", "-addr=:50051" ] # The command to run for the probe.
+          livenessProbe: # The probe used to determine if the container is still alive.
+            exec:
+              command: [ "/grpc-health-probe", "-addr=:50051" ] # The command to run for the probe.
+          lifecycle: # Actions to take before the container is terminated.
+            preStop:
+              exec:
+                command: [ "sh", "-c", "sleep 10" ] # The command to run before the container is terminated.
+          volumeMounts: # The volumes to mount in the container.
+            - mountPath: /configs # The path to mount the volume.
+              name: configs # The name of the volume.
+          resources: # The resource requests and limits for the container.
+            requests:
+              cpu: 100m # The CPU request.
+              memory: 100Mi # The memory request.
+            limits:
+              cpu: 100m # The CPU limit.
+              memory: 100Mi # The memory limit.
+      volumes: # The volumes to make available to the container.
+        - name: configs # The name of the volume.
+          configMap:
+            name: blog-config # The name of the ConfigMap to use for the volume.
+---
+# This is a Kubernetes Service object that exposes the Pods managed by the Deployment.
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-server # The name of the Service object.
+  labels:
+    app: user-server # A label that identifies the Service as belonging to the "user-server" application.
+spec:
+  selector:
+    app: user-server # The label selector that matches the Pods managed by this Service.
+  ports:
+    - port: 50051 # The port to expose on the Service.
+      targetPort: 50051 # The port that the Pods listen on.
+      appProtocol: grpc # The application protocol used by the port.
+      name: grpc # A name for the port.
+      # This is a configuration for a Kubernetes Metrics Server
+    - port: 9051 # The port number that the server will listen on
+      targetPort: 9051 # The port number that the server will forward traffic to
+      appProtocol: http # The protocol that the server will use to communicate with clients
+      name: metrics # A name for the server

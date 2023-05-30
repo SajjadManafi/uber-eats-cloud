@@ -1,2 +1,4 @@
 # uber-eats-cloud
-UU Cloud Computing - 14012
+## Docker files and K8s config files for my simple uber eats project
+
+### UU Cloud Computing - 14012S

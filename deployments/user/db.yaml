@@ -1,0 +1,101 @@
+# This is a Kubernetes Deployment object for a MariaDB database
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-db # The name of the deployment
+  labels:
+    app: user-db # A label for the deployment
+spec:
+  selector:
+    matchLabels:
+      app: user-db # The label to match for the deployment
+  strategy:
+    type: Recreate # The deployment strategy
+  template:
+    metadata:
+      labels:
+        app: user-db # A label for the pod
+    spec:
+      containers:
+        - name: user-db # The name of the container
+          image: mariadb # The Docker image to use
+          env:
+            - name: MYSQL_ALLOW_EMPTY_PASSWORD # An environment variable
+              value: 'true'
+          ports:
+            - containerPort: 3306 # The port to expose
+          volumeMounts:
+            - mountPath: /var/lib/mysql # A volume mount for the database data
+              name: user-db
+            - mountPath: /docker-entrypoint-initdb.d # A volume mount for the database initialization script
+              name: user-initdb
+          livenessProbe:
+            exec:
+              command: [ "mysqladmin", "ping" ] # A command to check the container's health
+          readinessProbe:
+            exec:
+              command: [ "mysql", "-h", "127.0.0.1", "-e", "SELECT 1" ] # A command to check if the container is ready
+          resources:
+            requests:
+              cpu: 200m # The CPU request for the container
+              memory: 200Mi # The memory request for the container
+            limits:
+              cpu: 200m # The CPU limit for the container
+              memory: 200Mi # The memory limit for the container
+      volumes:
+        - name: user-db # The name of the volume
+          persistentVolumeClaim:
+            claimName: user-db # The name of the persistent volume claim
+        - name: user-initdb # The name of the volume
+          configMap:
+            name: user-initdb # The name of the ConfigMap
+---
+# This is a Kubernetes ConfigMap object for the database initialization script
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: user-initdb # The name of the ConfigMap
+  labels:
+    app: user-db # A label for the ConfigMap
+data:
+  initdb.sql: |
+    create database if not exists users;
+    use users;
+    create table if not exists users
+    (
+        id         bigint unsigned not null auto_increment primary key,
+        username   varchar(255)    not null unique,
+        email      varchar(255)    not null unique,
+        password   varchar(255)    not null,
+        created_at timestamp    default current_timestamp,
+        updated_at timestamp    default current_timestamp on update current_timestamp,
+    );
+---
+# This is a Kubernetes PersistentVolumeClaim object for the database data
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: user-db # The name of the persistent volume claim
+  labels:
+    app: user-db # A label for the persistent volume claim
+spec:
+  accessModes:
+    - ReadWriteOnce # The access mode for the persistent volume claim
+  resources:
+    requests:
+      storage: 1Gi # The storage request for the persistent volume claim
+---
+# This is a Kubernetes Service object for the database
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-db # The name of the service
+  labels:
+    app: user-db # A label for the service
+spec:
+  selector:
+    app: user-db # The label to match for the pods
+  ports:
+    - port: 3306 # The port to expose
+      targetPort: 3306 # The target port for the service
+      appProtocol: mysql # The application protocol for the service
